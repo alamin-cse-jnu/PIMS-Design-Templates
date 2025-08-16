@@ -1,0 +1,435 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Users - PIMS{% endblock %}
+
+{% block breadcrumb_items %}
+    <li class="breadcrumb-item active">Users</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">
+                <i class="bi bi-people me-2 text-primary"></i>
+                User Management
+            </h1>
+            <p class="text-muted mb-0">Manage users and their permissions in PIMS</p>
+        </div>
+        <div class="btn-group">
+            {% if perms.auth.add_user %}
+                <a href="{% url 'users:create' %}" class="btn btn-parliament-primary">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Add New User
+                </a>
+            {% endif %}
+            {% if perms.auth.view_user %}
+                <a href="{% url 'users:export' %}" class="btn btn-outline-secondary">
+                    <i class="bi bi-download me-2"></i>
+                    Export Users
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Search and Filter Card -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-3">
+                    <label for="search" class="form-label">Search Users</label>
+                    <input type="text" class="form-control" id="search" name="search" 
+                           value="{{ request.GET.search }}" 
+                           placeholder="Name, username, employee ID...">
+                </div>
+                <div class="col-md-2">
+                    <label for="department" class="form-label">Department</label>
+                    <select class="form-select" id="department" name="department">
+                        <option value="">All Departments</option>
+                        <option value="IT" {% if request.GET.department == 'IT' %}selected{% endif %}>IT</option>
+                        <option value="HR" {% if request.GET.department == 'HR' %}selected{% endif %}>HR</option>
+                        <option value="Finance" {% if request.GET.department == 'Finance' %}selected{% endif %}>Finance</option>
+                        <option value="Administration" {% if request.GET.department == 'Administration' %}selected{% endif %}>Administration</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">All Status</option>
+                        <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="role" class="form-label">Role</label>
+                    <select class="form-select" id="role" name="role">
+                        <option value="">All Roles</option>
+                        <option value="superuser" {% if request.GET.role == 'superuser' %}selected{% endif %}>Super Admin</option>
+                        <option value="staff" {% if request.GET.role == 'staff' %}selected{% endif %}>Staff</option>
+                        <option value="user" {% if request.GET.role == 'user' %}selected{% endif %}>Regular User</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-parliament-primary">
+                            <i class="bi bi-search me-2"></i>
+                            Search
+                        </button>
+                        <a href="{% url 'users:list' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-clockwise me-2"></i>
+                            Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Users List Card -->
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-list me-2"></i>
+                    Users List
+                </h5>
+                <small class="text-muted">
+                    Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} users
+                </small>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            {% if users %}
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">
+                                    <div class="d-flex align-items-center">
+                                        <input type="checkbox" class="form-check-input me-2" id="selectAll">
+                                        User
+                                    </div>
+                                </th>
+                                <th scope="col">Employee ID</th>
+                                <th scope="col">Department</th>
+                                <th scope="col">Contact</th>
+                                <th scope="col">Role</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Last Login</th>
+                                <th scope="col" class="text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user_obj in users %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <input type="checkbox" class="form-check-input me-3" name="selected_users" value="{{ user_obj.pk }}">
+                                            {% if user_obj.profile_image %}
+                                                <img src="{{ user_obj.profile_image.url }}" alt="{{ user_obj.get_full_name }}" class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center text-white" style="width: 40px; height: 40px;">
+                                                    <i class="bi bi-person"></i>
+                                                </div>
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-0">{{ user_obj.get_full_name }}</h6>
+                                                <small class="text-muted">{{ user_obj.username }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark">{{ user_obj.employee_id|default:"-" }}</span>
+                                    </td>
+                                    <td>{{ user_obj.department|default:"-" }}</td>
+                                    <td>
+                                        {% if user_obj.email %}
+                                            <div>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-envelope me-1"></i>
+                                                    {{ user_obj.email }}
+                                                </small>
+                                            </div>
+                                        {% endif %}
+                                        {% if user_obj.phone %}
+                                            <div>
+                                                <small class="text-muted">
+                                                    <i class="bi bi-telephone me-1"></i>
+                                                    {{ user_obj.phone }}
+                                                </small>
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user_obj.is_superuser %}
+                                            <span class="badge bg-danger">Super Admin</span>
+                                        {% elif user_obj.is_staff %}
+                                            <span class="badge bg-warning">Staff</span>
+                                        {% else %}
+                                            <span class="badge bg-info">User</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user_obj.is_active and user_obj.is_active_employee %}
+                                            <span class="badge bg-success">
+                                                <i class="bi bi-check-circle me-1"></i>
+                                                Active
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">
+                                                <i class="bi bi-x-circle me-1"></i>
+                                                Inactive
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user_obj.last_login %}
+                                            <small class="text-muted">{{ user_obj.last_login|timesince }} ago</small>
+                                        {% else %}
+                                            <small class="text-muted">Never</small>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-center">
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                <i class="bi bi-three-dots"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li>
+                                                    <a class="dropdown-item" href="{% url 'users:detail' user_obj.pk %}">
+                                                        <i class="bi bi-eye me-2"></i>
+                                                        View Details
+                                                    </a>
+                                                </li>
+                                                {% if perms.auth.change_user %}
+                                                    <li>
+                                                        <a class="dropdown-item" href="{% url 'users:edit' user_obj.pk %}">
+                                                            <i class="bi bi-pencil me-2"></i>
+                                                            Edit User
+                                                        </a>
+                                                    </li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="{% url 'users:roles' user_obj.pk %}">
+                                                            <i class="bi bi-shield-check me-2"></i>
+                                                            Manage Roles
+                                                        </a>
+                                                    </li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    {% if user_obj.is_active %}
+                                                        <li>
+                                                            <form method="post" action="{% url 'users:deactivate' user_obj.pk %}" class="d-inline">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="dropdown-item text-warning" 
+                                                                        data-confirm="Are you sure you want to deactivate this user?"
+                                                                        onclick="return confirm(this.getAttribute('data-confirm'));">
+                                                                    <i class="bi bi-pause-circle me-2"></i>
+                                                                    Deactivate
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    {% else %}
+                                                        <li>
+                                                            <form method="post" action="{% url 'users:activate' user_obj.pk %}" class="d-inline">
+                                                                {% csrf_token %}
+                                                                <button type="submit" class="dropdown-item text-success" 
+                                                                        data-confirm="Are you sure you want to activate this user?"
+                                                                        onclick="return confirm(this.getAttribute('data-confirm'));">
+                                                                    <i class="bi bi-play-circle me-2"></i>
+                                                                    Activate
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    {% endif %}
+                                                {% endif %}
+                                                {% if perms.auth.delete_user and user_obj != user %}
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item text-danger" href="{% url 'users:delete' user_obj.pk %}">
+                                                            <i class="bi bi-trash me-2"></i>
+                                                            Delete User
+                                                        </a>
+                                                    </li>
+                                                {% endif %}
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-people text-muted" style="font-size: 4rem;"></i>
+                    <h5 class="mt-3">No Users Found</h5>
+                    <p class="text-muted">
+                        {% if request.GET.search %}
+                            No users match your search criteria. Try adjusting your filters.
+                        {% else %}
+                            There are no users in the system yet.
+                        {% endif %}
+                    </p>
+                    {% if perms.auth.add_user %}
+                        <a href="{% url 'users:create' %}" class="btn btn-parliament-primary">
+                            <i class="bi bi-plus-circle me-2"></i>
+                            Add First User
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+            <div class="card-footer">
+                <nav aria-label="Users pagination">
+                    <ul class="pagination justify-content-center mb-0">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.department %}department={{ request.GET.department }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.role %}role={{ request.GET.role }}&{% endif %}page=1">
+                                    <i class="bi bi-chevron-double-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.department %}department={{ request.GET.department }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.role %}role={{ request.GET.role }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                                    <i class="bi bi-chevron-left"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.department %}department={{ request.GET.department }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.role %}role={{ request.GET.role }}&{% endif %}page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.department %}department={{ request.GET.department }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.role %}role={{ request.GET.role }}&{% endif %}page={{ page_obj.next_page_number }}">
+                                    <i class="bi bi-chevron-right"></i>
+                                </a>
+                            </li>
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}{% if request.GET.department %}department={{ request.GET.department }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}{% if request.GET.role %}role={{ request.GET.role }}&{% endif %}page={{ page_obj.paginator.num_pages }}">
+                                    <i class="bi bi-chevron-double-right"></i>
+                                </a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Bulk Actions (Hidden by default) -->
+    <div id="bulkActions" class="card mt-3" style="display: none;">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>Bulk Actions:</strong>
+                    <span id="selectedCount">0</span> users selected
+                </div>
+                <div class="btn-group">
+                    {% if perms.auth.change_user %}
+                        <button type="button" class="btn btn-outline-warning" onclick="bulkDeactivate()">
+                            <i class="bi bi-pause-circle me-2"></i>
+                            Deactivate Selected
+                        </button>
+                        <button type="button" class="btn btn-outline-success" onclick="bulkActivate()">
+                            <i class="bi bi-play-circle me-2"></i>
+                            Activate Selected
+                        </button>
+                    {% endif %}
+                    {% if perms.auth.delete_user %}
+                        <button type="button" class="btn btn-outline-danger" onclick="bulkDelete()">
+                            <i class="bi bi-trash me-2"></i>
+                            Delete Selected
+                        </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Select All functionality
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const userCheckboxes = document.querySelectorAll('input[name="selected_users"]');
+        const bulkActionsCard = document.getElementById('bulkActions');
+        const selectedCountElement = document.getElementById('selectedCount');
+
+        function updateBulkActions() {
+            const selectedCount = document.querySelectorAll('input[name="selected_users"]:checked').length;
+            selectedCountElement.textContent = selectedCount;
+            
+            if (selectedCount > 0) {
+                bulkActionsCard.style.display = 'block';
+            } else {
+                bulkActionsCard.style.display = 'none';
+            }
+        }
+
+        selectAllCheckbox.addEventListener('change', function() {
+            userCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            updateBulkActions();
+        });
+
+        userCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateBulkActions();
+                
+                // Update select all checkbox state
+                const checkedCount = document.querySelectorAll('input[name="selected_users"]:checked').length;
+                selectAllCheckbox.checked = checkedCount === userCheckboxes.length;
+                selectAllCheckbox.indeterminate = checkedCount > 0 && checkedCount < userCheckboxes.length;
+            });
+        });
+
+        // Bulk action functions
+        window.bulkActivate = function() {
+            const selectedUsers = Array.from(document.querySelectorAll('input[name="selected_users"]:checked')).map(cb => cb.value);
+            if (selectedUsers.length === 0) return;
+            
+            if (confirm(`Are you sure you want to activate ${selectedUsers.length} selected users?`)) {
+                // Implement bulk activate functionality
+                console.log('Bulk activate:', selectedUsers);
+            }
+        };
+
+        window.bulkDeactivate = function() {
+            const selectedUsers = Array.from(document.querySelectorAll('input[name="selected_users"]:checked')).map(cb => cb.value);
+            if (selectedUsers.length === 0) return;
+            
+            if (confirm(`Are you sure you want to deactivate ${selectedUsers.length} selected users?`)) {
+                // Implement bulk deactivate functionality
+                console.log('Bulk deactivate:', selectedUsers);
+            }
+        };
+
+        window.bulkDelete = function() {
+            const selectedUsers = Array.from(document.querySelectorAll('input[name="selected_users"]:checked')).map(cb => cb.value);
+            if (selectedUsers.length === 0) return;
+            
+            if (confirm(`Are you sure you want to delete ${selectedUsers.length} selected users? This action cannot be undone.`)) {
+                // Implement bulk delete functionality
+                console.log('Bulk delete:', selectedUsers);
+            }
+        };
+    });
+</script>
+{% endblock %}
