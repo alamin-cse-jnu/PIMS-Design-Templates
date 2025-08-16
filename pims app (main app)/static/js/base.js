@@ -73,11 +73,80 @@ const PIMS = {
             });
         }
 
-        // Initialize collapsible menu items
-        this.initCollapsibleMenus();
+        // Initialize click-based submenu functionality
+        this.initClickBasedMenus();
     },
 
-    // Handle collapsible sidebar menus (Reports, etc.)
+    // Handle click-based sidebar submenus
+    initClickBasedMenus: function() {
+        // For now, show all submenus by default (like original hover behavior)
+        const allSubmenus = document.querySelectorAll('.submenu');
+        allSubmenus.forEach(submenu => {
+            submenu.classList.add('show');
+        });
+
+        const menuToggleLinks = document.querySelectorAll('.nav-link-toggle[data-toggle="submenu"]');
+        
+        menuToggleLinks.forEach(toggleLink => {
+            toggleLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const parentNavItem = this.closest('.nav-item');
+                const submenu = parentNavItem.querySelector('.submenu');
+                const toggleIcon = this.querySelector('.toggle-icon');
+                
+                if (submenu) {
+                    // Check if submenu is currently open
+                    const isOpen = submenu.classList.contains('show');
+                    
+                    // Close all other submenus first
+                    document.querySelectorAll('.submenu.show').forEach(openSubmenu => {
+                        if (openSubmenu !== submenu) {
+                            openSubmenu.classList.remove('show');
+                            const otherToggleLink = openSubmenu.closest('.nav-item').querySelector('.nav-link-toggle');
+                            const otherToggleIcon = otherToggleLink.querySelector('.toggle-icon');
+                            otherToggleLink.classList.remove('expanded');
+                            if (otherToggleIcon) {
+                                otherToggleIcon.style.transform = 'rotate(0deg)';
+                            }
+                        }
+                    });
+                    
+                    // Toggle current submenu
+                    if (isOpen) {
+                        submenu.classList.remove('show');
+                        this.classList.remove('expanded');
+                        if (toggleIcon) {
+                            toggleIcon.style.transform = 'rotate(0deg)';
+                        }
+                    } else {
+                        submenu.classList.add('show');
+                        this.classList.add('expanded');
+                        if (toggleIcon) {
+                            toggleIcon.style.transform = 'rotate(180deg)';
+                        }
+                    }
+                }
+            });
+        });
+
+        // Handle regular navigation links that should also navigate
+        const regularNavLinks = document.querySelectorAll('.nav-link-toggle[data-toggle="submenu"]');
+        regularNavLinks.forEach(link => {
+            // Allow Ctrl+Click or middle-click to open in new tab/window
+            link.addEventListener('click', function(e) {
+                if (e.ctrlKey || e.metaKey || e.button === 1) {
+                    const href = this.getAttribute('href');
+                    if (href && href !== '#') {
+                        window.open(href, '_blank');
+                    }
+                }
+            });
+        });
+    },
+
+    // Legacy collapsible menu support (for Bootstrap collapse)
     initCollapsibleMenus: function() {
         const collapseButtons = document.querySelectorAll('[data-bs-toggle="collapse"]');
         
@@ -125,17 +194,19 @@ const PIMS = {
                 link.classList.add('active');
                 
                 // If it's a submenu item, expand parent menu
-                const parentCollapse = link.closest('.collapse');
-                if (parentCollapse) {
-                    const bsCollapse = new bootstrap.Collapse(parentCollapse, {show: true});
+                const parentSubmenu = link.closest('.submenu');
+                if (parentSubmenu) {
+                    parentSubmenu.classList.add('show');
                     
-                    // Update chevron icon
-                    const toggleButton = document.querySelector(`[data-bs-target="#${parentCollapse.id}"]`);
-                    if (toggleButton) {
-                        const chevron = toggleButton.querySelector('.bi-chevron-down');
-                        if (chevron) {
-                            chevron.classList.remove('bi-chevron-down');
-                            chevron.classList.add('bi-chevron-up');
+                    // Update parent toggle link
+                    const parentNavItem = parentSubmenu.closest('.nav-item');
+                    const toggleLink = parentNavItem.querySelector('.nav-link-toggle');
+                    const toggleIcon = toggleLink.querySelector('.toggle-icon');
+                    
+                    if (toggleLink) {
+                        toggleLink.classList.add('expanded');
+                        if (toggleIcon) {
+                            toggleIcon.style.transform = 'rotate(180deg)';
                         }
                     }
                 }
@@ -206,189 +277,63 @@ const PIMS = {
             button.addEventListener('click', function() {
                 const alert = this.closest('.alert');
                 if (alert) {
-                    alert.style.transition = 'all 0.3s ease';
                     alert.style.opacity = '0';
-                    alert.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        alert.remove();
+                    }, 150);
                 }
             });
         });
     },
 
-    // ===== TOOLTIPS AND POPOVERS =====
+    // ===== TOOLTIP FUNCTIONALITY =====
     initTooltips: function() {
         // Initialize Bootstrap tooltips
         const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltipTriggerList.map(function(tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl, {
-                animation: true,
-                delay: { show: 500, hide: 100 }
-            });
-        });
-
-        // Initialize Bootstrap popovers
-        const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
-        popoverTriggerList.map(function(popoverTriggerEl) {
-            return new bootstrap.Popover(popoverTriggerEl);
+            return new bootstrap.Tooltip(tooltipTriggerEl);
         });
     },
 
     // ===== MODAL FUNCTIONALITY =====
     initModals: function() {
-        // Confirmation modals
-        this.initConfirmModals();
+        // Enhanced modal functionality
+        const modals = document.querySelectorAll('.modal');
         
-        // QR Code modals
-        this.initQRCodeModals();
-        
-        // Image preview modals
-        this.initImageModals();
-    },
-
-    // Confirmation modals for delete actions
-    initConfirmModals: function() {
-        document.querySelectorAll('[data-confirm]').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
+        modals.forEach(modal => {
+            modal.addEventListener('show.bs.modal', function() {
+                document.body.classList.add('modal-open');
+            });
+            
+            modal.addEventListener('hidden.bs.modal', function() {
+                document.body.classList.remove('modal-open');
                 
-                const message = this.getAttribute('data-confirm') || 'Are you sure?';
-                const title = this.getAttribute('data-confirm-title') || 'Confirm Action';
-                
-                if (confirm(`${title}\n\n${message}`)) {
-                    // If it's a form, submit it
-                    const form = this.closest('form');
-                    if (form) {
-                        form.submit();
-                    } else {
-                        // If it's a link, follow it
-                        const href = this.getAttribute('href');
-                        if (href) {
-                            window.location.href = href;
-                        }
-                    }
+                // Clear any dynamic content
+                const dynamicContent = this.querySelector('.modal-dynamic-content');
+                if (dynamicContent) {
+                    dynamicContent.innerHTML = '';
                 }
             });
         });
-    },
-
-    // QR Code modal functionality
-    initQRCodeModals: function() {
-        document.querySelectorAll('[data-qr-code]').forEach(button => {
-            button.addEventListener('click', function() {
-                const qrData = this.getAttribute('data-qr-code');
-                const deviceId = this.getAttribute('data-device-id') || 'Device';
-                
-                // Create or update QR modal
-                let modal = document.getElementById('qrCodeModal');
-                if (!modal) {
-                    modal = this.createQRModal();
-                }
-                
-                // Generate QR code (you would integrate with a QR library here)
-                const qrContainer = modal.querySelector('.qr-code-container');
-                qrContainer.innerHTML = `
-                    <div class="text-center p-4">
-                        <div class="bg-light p-3 rounded">
-                            <strong>QR Code for ${deviceId}</strong><br>
-                            <small class="text-muted">${qrData}</small>
-                        </div>
-                    </div>
-                `;
-                
-                const bsModal = new bootstrap.Modal(modal);
-                bsModal.show();
-            });
-        });
-    },
-
-    // Create QR modal dynamically
-    createQRModal: function() {
-        const modalHTML = `
-            <div class="modal fade" id="qrCodeModal" tabindex="-1">
-                <div class="modal-dialog modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Device QR Code</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="qr-code-container"></div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" class="btn btn-primary" onclick="window.print()">Print</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        return document.getElementById('qrCodeModal');
-    },
-
-    // Image preview modals
-    initImageModals: function() {
-        document.querySelectorAll('.image-preview').forEach(img => {
-            img.style.cursor = 'pointer';
-            img.addEventListener('click', function() {
-                const src = this.src;
-                const alt = this.alt || 'Image Preview';
-                
-                // Create or update image modal
-                let modal = document.getElementById('imagePreviewModal');
-                if (!modal) {
-                    modal = this.createImageModal();
-                }
-                
-                const modalImg = modal.querySelector('.modal-image');
-                const modalTitle = modal.querySelector('.modal-title');
-                
-                modalImg.src = src;
-                modalTitle.textContent = alt;
-                
-                const bsModal = new bootstrap.Modal(modal);
-                bsModal.show();
-            });
-        });
-    },
-
-    // Create image preview modal
-    createImageModal: function() {
-        const modalHTML = `
-            <div class="modal fade" id="imagePreviewModal" tabindex="-1">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Image Preview</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body text-center">
-                            <img class="modal-image img-fluid" src="" alt="">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        return document.getElementById('imagePreviewModal');
     },
 
     // ===== TABLE FUNCTIONALITY =====
     initTables: function() {
-        // Table sorting
+        // Initialize table sorting
         this.initTableSorting();
         
-        // Table row selection
+        // Initialize row selection
         this.initTableSelection();
         
-        // Responsive table enhancements
+        // Initialize responsive tables
         this.initResponsiveTables();
     },
 
     // Table sorting functionality
     initTableSorting: function() {
-        document.querySelectorAll('th[data-sort]').forEach(header => {
+        const sortableHeaders = document.querySelectorAll('th[data-sort]');
+        
+        sortableHeaders.forEach(header => {
             header.style.cursor = 'pointer';
             header.addEventListener('click', function() {
                 const table = this.closest('table');
@@ -440,27 +385,25 @@ const PIMS = {
         
         bulkActions.forEach(actionGroup => {
             actionGroup.style.display = selectedItems.length > 0 ? 'block' : 'none';
-            
-            const countElement = actionGroup.querySelector('.selection-count');
-            if (countElement) {
-                countElement.textContent = selectedItems.length;
-            }
         });
     },
 
-    // Responsive table enhancements
+    // Responsive table handling
     initResponsiveTables: function() {
-        // Add mobile-friendly data attributes
-        document.querySelectorAll('.table-responsive table').forEach(table => {
-            const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
-            
-            table.querySelectorAll('tbody tr').forEach(row => {
-                Array.from(row.querySelectorAll('td')).forEach((cell, index) => {
-                    if (headers[index]) {
-                        cell.setAttribute('data-label', headers[index]);
-                    }
+        const tables = document.querySelectorAll('.table-responsive');
+        
+        tables.forEach(table => {
+            // Add scroll indicators
+            const wrapper = table.parentElement;
+            if (wrapper) {
+                table.addEventListener('scroll', function() {
+                    const isScrolledLeft = this.scrollLeft > 0;
+                    const isScrolledRight = this.scrollLeft < (this.scrollWidth - this.clientWidth);
+                    
+                    wrapper.classList.toggle('scrolled-left', isScrolledLeft);
+                    wrapper.classList.toggle('scrolled-right', isScrolledRight);
                 });
-            });
+            }
         });
     },
 
@@ -469,168 +412,118 @@ const PIMS = {
         // Form validation
         this.initFormValidation();
         
-        // Image upload handling
-        this.initImageUpload();
+        // Enhanced form interactions
+        this.initFormInteractions();
         
-        // Auto-save functionality
-        this.initAutoSave();
+        // File upload handling
+        this.initFileUploads();
     },
 
     // Form validation
     initFormValidation: function() {
-        document.querySelectorAll('.needs-validation').forEach(form => {
-            form.addEventListener('submit', function(e) {
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        forms.forEach(form => {
+            form.addEventListener('submit', function(event) {
                 if (!form.checkValidity()) {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    event.preventDefault();
+                    event.stopPropagation();
                 }
                 form.classList.add('was-validated');
             });
         });
+    },
 
-        // Real-time validation
-        document.querySelectorAll('input[required], select[required], textarea[required]').forEach(field => {
-            field.addEventListener('blur', function() {
-                if (this.checkValidity()) {
-                    this.classList.remove('is-invalid');
-                    this.classList.add('is-valid');
-                } else {
-                    this.classList.remove('is-valid');
-                    this.classList.add('is-invalid');
-                }
+    // Enhanced form interactions
+    initFormInteractions: function() {
+        // Auto-resize textareas
+        const textareas = document.querySelectorAll('textarea[data-auto-resize]');
+        textareas.forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+        });
+
+        // Character counters
+        const inputsWithCounter = document.querySelectorAll('input[data-max-length], textarea[data-max-length]');
+        inputsWithCounter.forEach(input => {
+            const maxLength = input.getAttribute('data-max-length');
+            const counter = document.createElement('small');
+            counter.className = 'form-text text-muted';
+            input.parentNode.appendChild(counter);
+            
+            const updateCounter = () => {
+                const remaining = maxLength - input.value.length;
+                counter.textContent = `${remaining} characters remaining`;
+                counter.classList.toggle('text-danger', remaining < 0);
+            };
+            
+            input.addEventListener('input', updateCounter);
+            updateCounter();
+        });
+    },
+
+    // File upload handling
+    initFileUploads: function() {
+        const fileInputs = document.querySelectorAll('input[type="file"]');
+        
+        fileInputs.forEach(input => {
+            input.addEventListener('change', function() {
+                const files = Array.from(this.files);
+                const fileList = this.parentNode.querySelector('.file-list') || 
+                               this.parentNode.appendChild(document.createElement('div'));
+                fileList.className = 'file-list mt-2';
+                
+                fileList.innerHTML = files.map(file => 
+                    `<div class="file-item d-flex align-items-center p-2 border rounded mb-1">
+                        <i class="bi bi-file-earmark me-2"></i>
+                        <span class="flex-grow-1">${file.name}</span>
+                        <small class="text-muted">${(file.size / 1024).toFixed(1)} KB</small>
+                    </div>`
+                ).join('');
             });
         });
     },
 
     // ===== IMAGE HANDLING =====
     initImageHandling: function() {
-        this.initImageUpload();
-        this.initImagePreviews();
-    },
-
-    // Image upload with preview
-    initImageUpload: function() {
-        document.querySelectorAll('input[type="file"][accept*="image"]').forEach(input => {
-            input.addEventListener('change', function() {
-                const file = this.files[0];
-                const previewContainer = document.querySelector(`[data-preview-for="${this.id}"]`);
-                
-                if (file && previewContainer) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        let img = previewContainer.querySelector('img');
-                        if (!img) {
-                            img = document.createElement('img');
-                            img.className = 'img-thumbnail';
-                            img.style.maxWidth = '200px';
-                            img.style.maxHeight = '200px';
-                            previewContainer.appendChild(img);
-                        }
-                        img.src = e.target.result;
-                        img.style.display = 'block';
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
-        });
-    },
-
-    // Image preview functionality
-    initImagePreviews: function() {
-        document.querySelectorAll('.image-preview').forEach(img => {
-            img.style.cursor = 'pointer';
-            img.addEventListener('click', function() {
-                // Create modal if it doesn't exist
-                let modal = document.getElementById('imageModal');
-                if (!modal) {
-                    modal = PIMS.createImageModal();
-                }
-                
-                const modalImg = modal.querySelector('.modal-body img');
-                modalImg.src = this.src;
-                modalImg.alt = this.alt;
-                
-                const bsModal = new bootstrap.Modal(modal);
-                bsModal.show();
-            });
-        });
-    },
-
-    // Auto-save functionality
-    initAutoSave: function() {
-        document.querySelectorAll('form[data-auto-save]').forEach(form => {
-            const inputs = form.querySelectorAll('input, textarea, select');
-            
-            inputs.forEach(input => {
-                input.addEventListener('input', function() {
-                    clearTimeout(this.autoSaveTimeout);
-                    this.autoSaveTimeout = setTimeout(() => {
-                        PIMS.autoSaveForm(form);
-                    }, 2000); // Auto-save after 2 seconds of inactivity
+        // Lazy loading for images
+        const images = document.querySelectorAll('img[data-src]');
+        
+        if ('IntersectionObserver' in window) {
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy');
+                        imageObserver.unobserve(img);
+                    }
                 });
             });
-        });
-    },
-
-    // Auto-save form data
-    autoSaveForm: function(form) {
-        const formData = new FormData(form);
-        const saveData = {};
-        
-        for (let [key, value] of formData.entries()) {
-            saveData[key] = value;
+            
+            images.forEach(img => imageObserver.observe(img));
+        } else {
+            // Fallback for older browsers
+            images.forEach(img => {
+                img.src = img.dataset.src;
+            });
         }
-        
-        // Save to localStorage
-        const formId = form.id || 'autoSaveForm';
-        localStorage.setItem(`autoSave_${formId}`, JSON.stringify(saveData));
-        
-        // Show auto-save indicator
-        this.showAutoSaveIndicator();
     },
 
-    // Show auto-save indicator
-    showAutoSaveIndicator: function() {
-        let indicator = document.getElementById('autoSaveIndicator');
-        if (!indicator) {
-            indicator = document.createElement('div');
-            indicator.id = 'autoSaveIndicator';
-            indicator.className = 'position-fixed top-0 end-0 m-3 alert alert-success alert-sm';
-            indicator.innerHTML = '<i class="bi bi-check-circle me-1"></i>Auto-saved';
-            document.body.appendChild(indicator);
-        }
-        
-        indicator.style.display = 'block';
-        setTimeout(() => {
-            indicator.style.display = 'none';
-        }, 2000);
-    },
-
-    // ===== CHART FUNCTIONALITY =====
+    // ===== CHART INITIALIZATION =====
     initCharts: function() {
-        // Initialize Chart.js charts if available
-        if (typeof Chart !== 'undefined') {
-            this.initDashboardCharts();
-        }
-    },
-
-    // Initialize dashboard charts
-    initDashboardCharts: function() {
         // Device Status Chart
-        const deviceStatusChart = document.getElementById('deviceStatusChart');
-        if (deviceStatusChart) {
-            new Chart(deviceStatusChart, {
+        const deviceChart = document.getElementById('deviceChart');
+        if (deviceChart && typeof Chart !== 'undefined') {
+            new Chart(deviceChart, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Available', 'Assigned', 'Maintenance', 'Retired'],
+                    labels: ['Active', 'Maintenance', 'Retired'],
                     datasets: [{
-                        data: [45, 30, 15, 10],
-                        backgroundColor: [
-                            '#14b8a6', // teal
-                            '#f97316', // orange
-                            '#eab308', // yellow
-                            '#ef4444'  // red
-                        ],
+                        data: [65, 25, 10],
+                        backgroundColor: ['#14b8a6', '#f97316', '#ef4444'],
                         borderWidth: 0
                     }]
                 },
@@ -648,7 +541,7 @@ const PIMS = {
 
         // Maintenance Timeline Chart
         const maintenanceChart = document.getElementById('maintenanceChart');
-        if (maintenanceChart) {
+        if (maintenanceChart && typeof Chart !== 'undefined') {
             new Chart(maintenanceChart, {
                 type: 'line',
                 data: {
@@ -827,21 +720,5 @@ window.addEventListener('unhandledrejection', function(event) {
     PIMS.showToast('An error occurred. Please try again.', 'danger');
 });
 
-// Performance monitoring
-window.addEventListener('load', function() {
-    if ('performance' in window) {
-        setTimeout(function() {
-            const perfData = performance.getEntriesByType('navigation')[0];
-            if (perfData && perfData.loadEventEnd > 0) {
-                console.log('Page load time:', Math.round(perfData.loadEventEnd - perfData.fetchStart), 'ms');
-            }
-        }, 0);
-    }
-});
-
-// Service worker registration for PWA features
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(function(error) {
-        console.log('ServiceWorker registration failed: ', error);
-    });
-}
+// Export PIMS for use in other scripts
+window.PIMS = PIMS;
