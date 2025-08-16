@@ -12,7 +12,7 @@ const PIMS = {
         searchDelay: 300,
         alertDuration: 5000,
         animationDuration: 300,
-        sidebarBreakpoint: 991
+        sidebarBreakpoint: 1024
     },
 
     // Initialize application
@@ -27,6 +27,7 @@ const PIMS = {
         this.initTables();
         this.initForms();
         this.initImageHandling();
+        this.initCharts();
         
         console.log('PIMS initialized successfully');
     },
@@ -166,42 +167,41 @@ const PIMS = {
         const dropdowns = document.querySelectorAll('.dropdown-toggle');
         
         dropdowns.forEach(dropdown => {
-            dropdown.addEventListener('shown.bs.dropdown', function() {
-                const menu = this.nextElementSibling;
-                if (menu && menu.classList.contains('dropdown-menu')) {
-                    menu.style.opacity = '0';
-                    menu.style.transform = 'translateY(-10px)';
-                    
-                    setTimeout(() => {
-                        menu.style.transition = 'all 0.2s ease';
-                        menu.style.opacity = '1';
-                        menu.style.transform = 'translateY(0)';
-                    }, 10);
-                }
+            dropdown.addEventListener('show.bs.dropdown', function() {
+                this.setAttribute('aria-expanded', 'true');
+            });
+            
+            dropdown.addEventListener('hide.bs.dropdown', function() {
+                this.setAttribute('aria-expanded', 'false');
             });
         });
     },
 
-    // ===== ALERT SYSTEM =====
+    // ===== ALERT FUNCTIONALITY =====
     initAlerts: function() {
-        // Auto-hide alerts after configured duration
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert:not(.alert-permanent)');
-            alerts.forEach(alert => {
-                const alertInstance = bootstrap.Alert.getOrCreateInstance(alert);
-                if (alertInstance) {
-                    alert.style.transition = 'all 0.3s ease';
-                    alert.style.opacity = '0';
-                    alert.style.transform = 'translateY(-20px)';
-                    
-                    setTimeout(() => {
-                        alertInstance.close();
-                    }, 300);
-                }
-            });
-        }, this.config.alertDuration);
+        // Auto-dismiss alerts
+        this.initAutoDismissAlerts();
+        
+        // Enhanced alert interactions
+        this.initAlertInteractions();
+    },
 
-        // Enhanced alert dismissal
+    // Auto-dismiss functionality for alerts
+    initAutoDismissAlerts: function() {
+        const alerts = document.querySelectorAll('.alert[data-auto-dismiss="true"]');
+        
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                const alertInstance = bootstrap.Alert.getOrCreateInstance(alert);
+                if (alertInstance && alert.classList.contains('show')) {
+                    alertInstance.close();
+                }
+            }, PIMS.config.alertDuration);
+        });
+    },
+
+    // Enhanced alert interactions
+    initAlertInteractions: function() {
         document.querySelectorAll('.alert .btn-close').forEach(button => {
             button.addEventListener('click', function() {
                 const alert = this.closest('.alert');
@@ -251,9 +251,9 @@ const PIMS = {
                 e.preventDefault();
                 
                 const message = this.getAttribute('data-confirm') || 'Are you sure?';
-                const action = this.getAttribute('data-action') || 'delete';
+                const title = this.getAttribute('data-confirm-title') || 'Confirm Action';
                 
-                if (confirm(message)) {
+                if (confirm(`${title}\n\n${message}`)) {
                     // If it's a form, submit it
                     const form = this.closest('form');
                     if (form) {
@@ -274,42 +274,109 @@ const PIMS = {
     initQRCodeModals: function() {
         document.querySelectorAll('[data-qr-code]').forEach(button => {
             button.addEventListener('click', function() {
-                const qrCodeUrl = this.getAttribute('data-qr-code');
-                const modal = document.getElementById('qrCodeModal');
+                const qrData = this.getAttribute('data-qr-code');
+                const deviceId = this.getAttribute('data-device-id') || 'Device';
                 
-                if (modal && qrCodeUrl) {
-                    const img = modal.querySelector('.qr-code-image');
-                    if (img) {
-                        img.src = qrCodeUrl;
-                        img.alt = 'QR Code for ' + (this.getAttribute('data-device-name') || 'Device');
-                    }
+                // Create or update QR modal
+                let modal = document.getElementById('qrCodeModal');
+                if (!modal) {
+                    modal = this.createQRModal();
                 }
+                
+                // Generate QR code (you would integrate with a QR library here)
+                const qrContainer = modal.querySelector('.qr-code-container');
+                qrContainer.innerHTML = `
+                    <div class="text-center p-4">
+                        <div class="bg-light p-3 rounded">
+                            <strong>QR Code for ${deviceId}</strong><br>
+                            <small class="text-muted">${qrData}</small>
+                        </div>
+                    </div>
+                `;
+                
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.show();
             });
         });
+    },
+
+    // Create QR modal dynamically
+    createQRModal: function() {
+        const modalHTML = `
+            <div class="modal fade" id="qrCodeModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Device QR Code</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="qr-code-container"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="window.print()">Print</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        return document.getElementById('qrCodeModal');
     },
 
     // Image preview modals
     initImageModals: function() {
         document.querySelectorAll('.image-preview').forEach(img => {
+            img.style.cursor = 'pointer';
             img.addEventListener('click', function() {
-                const modal = document.getElementById('imageModal');
-                if (modal) {
-                    const modalImg = modal.querySelector('.modal-image');
-                    if (modalImg) {
-                        modalImg.src = this.src;
-                        modalImg.alt = this.alt;
-                    }
-                    
-                    const modalInstance = new bootstrap.Modal(modal);
-                    modalInstance.show();
+                const src = this.src;
+                const alt = this.alt || 'Image Preview';
+                
+                // Create or update image modal
+                let modal = document.getElementById('imagePreviewModal');
+                if (!modal) {
+                    modal = this.createImageModal();
                 }
+                
+                const modalImg = modal.querySelector('.modal-image');
+                const modalTitle = modal.querySelector('.modal-title');
+                
+                modalImg.src = src;
+                modalTitle.textContent = alt;
+                
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.show();
             });
         });
     },
 
+    // Create image preview modal
+    createImageModal: function() {
+        const modalHTML = `
+            <div class="modal fade" id="imagePreviewModal" tabindex="-1">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Image Preview</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img class="modal-image img-fluid" src="" alt="">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        return document.getElementById('imagePreviewModal');
+    },
+
     // ===== TABLE FUNCTIONALITY =====
     initTables: function() {
-        // Enhanced table sorting
+        // Table sorting
         this.initTableSorting();
         
         // Table row selection
@@ -474,104 +541,248 @@ const PIMS = {
             img.style.cursor = 'pointer';
             img.addEventListener('click', function() {
                 // Create modal if it doesn't exist
-                let modal = document.getElementById('imagePreviewModal');
+                let modal = document.getElementById('imageModal');
                 if (!modal) {
-                    modal = this.createImageModal();
+                    modal = PIMS.createImageModal();
                 }
                 
                 const modalImg = modal.querySelector('.modal-body img');
-                if (modalImg) {
-                    modalImg.src = this.src;
-                    modalImg.alt = this.alt;
-                }
+                modalImg.src = this.src;
+                modalImg.alt = this.alt;
                 
-                const modalInstance = new bootstrap.Modal(modal);
-                modalInstance.show();
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.show();
             });
         });
     },
 
-    // Create image preview modal
-    createImageModal: function() {
-        const modal = document.createElement('div');
-        modal.className = 'modal fade';
-        modal.id = 'imagePreviewModal';
-        modal.innerHTML = `
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Image Preview</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body text-center">
-                        <img src="" alt="" class="img-fluid">
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(modal);
-        return modal;
-    },
-
-    // ===== AUTO-SAVE FUNCTIONALITY =====
+    // Auto-save functionality
     initAutoSave: function() {
-        let autoSaveTimeout;
-        const autoSaveForms = document.querySelectorAll('[data-auto-save]');
-        
-        autoSaveForms.forEach(form => {
-            const inputs = form.querySelectorAll('input, select, textarea');
+        document.querySelectorAll('form[data-auto-save]').forEach(form => {
+            const inputs = form.querySelectorAll('input, textarea, select');
             
             inputs.forEach(input => {
                 input.addEventListener('input', function() {
-                    clearTimeout(autoSaveTimeout);
-                    autoSaveTimeout = setTimeout(() => {
-                        PIMS.performAutoSave(form);
+                    clearTimeout(this.autoSaveTimeout);
+                    this.autoSaveTimeout = setTimeout(() => {
+                        PIMS.autoSaveForm(form);
                     }, 2000); // Auto-save after 2 seconds of inactivity
                 });
             });
         });
     },
 
-    // Perform auto-save
-    performAutoSave: function(form) {
+    // Auto-save form data
+    autoSaveForm: function(form) {
         const formData = new FormData(form);
-        const saveUrl = form.getAttribute('data-auto-save');
+        const saveData = {};
         
-        if (saveUrl) {
-            fetch(saveUrl, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        for (let [key, value] of formData.entries()) {
+            saveData[key] = value;
+        }
+        
+        // Save to localStorage
+        const formId = form.id || 'autoSaveForm';
+        localStorage.setItem(`autoSave_${formId}`, JSON.stringify(saveData));
+        
+        // Show auto-save indicator
+        this.showAutoSaveIndicator();
+    },
+
+    // Show auto-save indicator
+    showAutoSaveIndicator: function() {
+        let indicator = document.getElementById('autoSaveIndicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'autoSaveIndicator';
+            indicator.className = 'position-fixed top-0 end-0 m-3 alert alert-success alert-sm';
+            indicator.innerHTML = '<i class="bi bi-check-circle me-1"></i>Auto-saved';
+            document.body.appendChild(indicator);
+        }
+        
+        indicator.style.display = 'block';
+        setTimeout(() => {
+            indicator.style.display = 'none';
+        }, 2000);
+    },
+
+    // ===== CHART FUNCTIONALITY =====
+    initCharts: function() {
+        // Initialize Chart.js charts if available
+        if (typeof Chart !== 'undefined') {
+            this.initDashboardCharts();
+        }
+    },
+
+    // Initialize dashboard charts
+    initDashboardCharts: function() {
+        // Device Status Chart
+        const deviceStatusChart = document.getElementById('deviceStatusChart');
+        if (deviceStatusChart) {
+            new Chart(deviceStatusChart, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Available', 'Assigned', 'Maintenance', 'Retired'],
+                    datasets: [{
+                        data: [45, 30, 15, 10],
+                        backgroundColor: [
+                            '#14b8a6', // teal
+                            '#f97316', // orange
+                            '#eab308', // yellow
+                            '#ef4444'  // red
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    this.showToast('Draft saved automatically', 'success');
+            });
+        }
+
+        // Maintenance Timeline Chart
+        const maintenanceChart = document.getElementById('maintenanceChart');
+        if (maintenanceChart) {
+            new Chart(maintenanceChart, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Completed',
+                        data: [12, 19, 15, 25, 22, 30],
+                        borderColor: '#14b8a6',
+                        backgroundColor: 'rgba(20, 184, 166, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Scheduled',
+                        data: [8, 15, 12, 18, 16, 24],
+                        borderColor: '#f97316',
+                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
                 }
-            })
-            .catch(error => {
-                console.log('Auto-save failed:', error);
             });
         }
     },
 
+    // ===== SEARCH FUNCTIONALITY =====
+    initSearch: function() {
+        const searchInputs = document.querySelectorAll('input[type="search"]');
+        
+        searchInputs.forEach(input => {
+            let searchTimeout;
+            
+            input.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                
+                searchTimeout = setTimeout(() => {
+                    if (this.value.length >= 2 || this.value.length === 0) {
+                        PIMS.performSearch(this.value, this);
+                    }
+                }, PIMS.config.searchDelay);
+            });
+        });
+    },
+
+    // Perform search
+    performSearch: function(query, input) {
+        const searchContainer = input.closest('.search-container');
+        const resultsContainer = searchContainer?.querySelector('.search-results');
+        
+        if (!resultsContainer) return;
+        
+        if (query.length === 0) {
+            resultsContainer.style.display = 'none';
+            return;
+        }
+        
+        // Show loading state
+        resultsContainer.innerHTML = '<div class="p-2 text-center"><i class="bi bi-hourglass-split"></i> Searching...</div>';
+        resultsContainer.style.display = 'block';
+        
+        // Simulate API call (replace with actual search endpoint)
+        setTimeout(() => {
+            const mockResults = [
+                { title: 'Device DEV-001', type: 'device', url: '#' },
+                { title: 'John Doe', type: 'user', url: '#' },
+                { title: 'Conference Room A', type: 'location', url: '#' }
+            ];
+            
+            if (mockResults.length > 0) {
+                resultsContainer.innerHTML = mockResults.map(result => 
+                    `<a href="${result.url}" class="d-block p-2 text-decoration-none border-bottom">
+                        <i class="bi bi-${this.getIconForType(result.type)} me-2"></i>
+                        ${result.title}
+                        <small class="text-muted ms-2">${result.type}</small>
+                    </a>`
+                ).join('');
+            } else {
+                resultsContainer.innerHTML = '<div class="p-2 text-muted">No results found</div>';
+            }
+        }, 500);
+    },
+
+    // Get icon for search result type
+    getIconForType: function(type) {
+        const icons = {
+            device: 'laptop',
+            user: 'person',
+            location: 'geo-alt',
+            vendor: 'building'
+        };
+        return icons[type] || 'search';
+    },
+
     // ===== UTILITY FUNCTIONS =====
     
-    // Show toast notification
-    showToast: function(message, type = 'info') {
-        // Create toast container if it doesn't exist
-        let toastContainer = document.querySelector('.toast-container');
-        if (!toastContainer) {
-            toastContainer = document.createElement('div');
-            toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
-            toastContainer.style.zIndex = '1090';
-            document.body.appendChild(toastContainer);
+    // Show loading overlay
+    showLoading: function() {
+        let overlay = document.getElementById('loadingOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'loadingOverlay';
+            overlay.className = 'position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center';
+            overlay.style.cssText = 'background: rgba(255, 255, 255, 0.8); z-index: 9999;';
+            overlay.innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="text-muted">Please wait...</div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
         }
+        overlay.style.display = 'flex';
+    },
 
-        // Create toast
+    // Hide loading overlay
+    hideLoading: function() {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+    },
+
+    // Show toast notification
+    showToast: function(message, type = 'info', duration = 3000) {
+        const toastContainer = document.getElementById('toastContainer') || this.createToastContainer();
+        
         const toast = document.createElement('div');
         toast.className = `toast align-items-center text-white bg-${type} border-0`;
         toast.setAttribute('role', 'alert');
@@ -581,57 +792,56 @@ const PIMS = {
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
             </div>
         `;
-
+        
         toastContainer.appendChild(toast);
         
-        const toastInstance = new bootstrap.Toast(toast);
-        toastInstance.show();
-
+        const bsToast = new bootstrap.Toast(toast, { delay: duration });
+        bsToast.show();
+        
         // Remove toast element after it's hidden
         toast.addEventListener('hidden.bs.toast', function() {
-            toast.remove();
+            this.remove();
         });
     },
 
-    // Show loading overlay
-    showLoading: function() {
-        let overlay = document.querySelector('.loading-overlay');
-        if (!overlay) {
-            overlay = document.createElement('div');
-            overlay.className = 'loading-overlay';
-            overlay.innerHTML = '<div class="loading-spinner"></div>';
-            document.body.appendChild(overlay);
-        }
-        overlay.style.display = 'flex';
-    },
-
-    // Hide loading overlay
-    hideLoading: function() {
-        const overlay = document.querySelector('.loading-overlay');
-        if (overlay) {
-            overlay.style.display = 'none';
-        }
-    },
-
-    // AJAX setup for CSRF token
-    initAjaxSetup: function() {
-        // Get CSRF token
-        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
-        if (csrfToken) {
-            // Set up fetch defaults for CSRF
-            const originalFetch = window.fetch;
-            window.fetch = function(url, options = {}) {
-                if (typeof url === 'string' && !url.startsWith('http')) {
-                    options.headers = options.headers || {};
-                    if (options.method && options.method.toUpperCase() !== 'GET') {
-                        options.headers['X-CSRFToken'] = csrfToken.value;
-                    }
-                }
-                return originalFetch(url, options);
-            };
-        }
+    // Create toast container
+    createToastContainer: function() {
+        const container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container position-fixed top-0 end-0 p-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+        return container;
     }
 };
 
-// Export PIMS for global access
-window.PIMS = PIMS;
+// Global utility functions
+window.showLoading = PIMS.showLoading.bind(PIMS);
+window.hideLoading = PIMS.hideLoading.bind(PIMS);
+window.showToast = PIMS.showToast.bind(PIMS);
+
+// Global error handler for AJAX requests
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('Unhandled promise rejection:', event.reason);
+    PIMS.hideLoading();
+    PIMS.showToast('An error occurred. Please try again.', 'danger');
+});
+
+// Performance monitoring
+window.addEventListener('load', function() {
+    if ('performance' in window) {
+        setTimeout(function() {
+            const perfData = performance.getEntriesByType('navigation')[0];
+            if (perfData && perfData.loadEventEnd > 0) {
+                console.log('Page load time:', Math.round(perfData.loadEventEnd - perfData.fetchStart), 'ms');
+            }
+        }, 0);
+    }
+});
+
+// Service worker registration for PWA features
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js').catch(function(error) {
+        console.log('ServiceWorker registration failed: ', error);
+    });
+}
