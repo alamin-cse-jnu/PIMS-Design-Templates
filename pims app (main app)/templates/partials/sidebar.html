@@ -58,17 +58,17 @@
                     <a href="{% url 'locations:list' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
                         <i class="bi bi-list-ul me-2"></i>All Locations
                     </a>
+                    <a href="{% url 'locations:create' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
+                        <i class="bi bi-plus-circle me-2"></i>Add Location
+                    </a>
                     <a href="{% url 'locations:building_list' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
                         <i class="bi bi-building me-2"></i>Buildings
                     </a>
-                    <a href="{% url 'locations:floor_list' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-layers me-2"></i>Floors
+                    <a href="{% url 'locations:office_list' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
+                        <i class="bi bi-door-open me-2"></i>Offices
                     </a>
-                    <a href="{% url 'locations:room_list' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-door-open me-2"></i>Rooms
-                    </a>
-                    <a href="{% url 'locations:with_coordinates' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-geo me-2"></i>GPS Coordinates
+                    <a href="{% url 'locations:map' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
+                        <i class="bi bi-map me-2"></i>Location Map
                     </a>
                 </div>
             </div>
@@ -87,23 +87,23 @@
                     <a href="{% url 'devices:create' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
                         <i class="bi bi-plus-circle me-2"></i>Add Device
                     </a>
-                    <a href="{% url 'devices:available' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
+                    <a href="{% url 'devices:search' %}?status=available" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
                         <i class="bi bi-check-circle me-2"></i>Available
                     </a>
-                    <a href="{% url 'devices:assigned' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
+                    <a href="{% url 'devices:search' %}?status=assigned" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
                         <i class="bi bi-person-check me-2"></i>Assigned
                     </a>
-                    <a href="{% url 'devices:maintenance' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
+                    <a href="{% url 'devices:search' %}?status=maintenance" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
                         <i class="bi bi-tools me-2"></i>In Maintenance
                     </a>
                     <a href="{% url 'devices:category_list' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-tag me-2"></i>Categories
+                        <i class="bi bi-tags me-2"></i>Categories
                     </a>
-                    <a href="{% url 'devices:subcategory_list' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-tags me-2"></i>Subcategories
+                    <a href="{% url 'devices:qr_list' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
+                        <i class="bi bi-qr-code-scan me-2"></i>QR Scanner
                     </a>
-                    <a href="{% url 'devices:warranty_list' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-shield-check me-2"></i>Warranties
+                    <a href="{% url 'devices:reports' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
+                        <i class="bi bi-graph-up me-2"></i>Reports
                     </a>
                 </div>
             </div>
@@ -195,86 +195,43 @@
                         <i class="bi bi-exclamation-triangle me-2"></i>Overdue
                     </a>
                     <a href="{% url 'maintenance:schedule_recurring' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-arrow-repeat me-2"></i>Recurring
+                        <i class="bi bi-arrow-repeat me-2"></i>Recurring Schedule
                     </a>
-                    <a href="{% url 'maintenance:calendar' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-calendar3 me-2"></i>Calendar
+                    <a href="{% url 'maintenance:reports_home' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
+                        <i class="bi bi-graph-up me-2"></i>Reports
                     </a>
                 </div>
             </div>
         </div>
         
-        <!-- QR Codes & Reports -->
+        <!-- Reports & Analytics -->
         <div class="nav-section mb-4">
-            <h6 class="nav-header text-white-50 px-3 mb-2 small fw-semibold text-uppercase">QR Codes & Reports</h6>
+            <h6 class="nav-header text-white-50 px-3 mb-2 small fw-semibold text-uppercase">Analytics</h6>
             
-            <!-- QR Code Management -->
-            <div class="nav-item">
-                <a href="{% url 'devices:reports' %}" class="nav-link text-white-75 py-2 px-3 d-flex align-items-center rounded mx-2 transition-hover">
-                    <i class="bi bi-qr-code me-3"></i>
-                    <span class="flex-grow-1">QR Codes</span>
-                    <i class="bi bi-chevron-down small"></i>
-                </a>
-                <div class="submenu ms-4">
-                    <a href="{% url 'devices:reports' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-list-ul me-2"></i>All QR Codes
-                    </a>
-                    <a href="{% url 'devices:create' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-plus-circle me-2"></i>Generate QR
-                    </a>
-                    <a href="{% url 'devices:export_pdf' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-collection me-2"></i>Bulk Generate
-                    </a>
-                    <a href="{% url 'assignments:reports' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-arrow-left-right me-2"></i>Assignment QR
-                    </a>
-                    <a href="{% url 'locations:reports' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-geo-alt me-2"></i>Location QR
-                    </a>
-                </div>
-            </div>
+            <a href="#" class="nav-link text-white-75 py-2 px-3 d-block rounded mx-2 transition-hover">
+                <i class="bi bi-graph-up me-3"></i>Analytics Dashboard
+            </a>
             
-            <!-- Reports Management -->
-            <div class="nav-item">
-                <a href="{% url 'devices:reports' %}" class="nav-link text-white-75 py-2 px-3 d-flex align-items-center rounded mx-2 transition-hover">
-                    <i class="bi bi-graph-up me-3"></i>
-                    <span class="flex-grow-1">Reports</span>
-                    <i class="bi bi-chevron-down small"></i>
-                </a>
-                <div class="submenu ms-4">
-                    <a href="{% url 'devices:reports' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-laptop me-2"></i>Device Reports
-                    </a>
-                    <a href="{% url 'assignments:reports' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-arrow-left-right me-2"></i>Assignment Reports
-                    </a>
-                    <a href="{% url 'maintenance:reports_home' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-tools me-2"></i>Maintenance Reports
-                    </a>
-                    <a href="{% url 'users:reports' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-people me-2"></i>User Reports
-                    </a>
-                    <a href="{% url 'locations:reports' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-geo-alt me-2"></i>Location Reports
-                    </a>
-                    <a href="{% url 'vendors:reports' %}" class="nav-link text-white-50 py-1 px-3 d-block rounded small transition-hover">
-                        <i class="bi bi-building me-2"></i>Vendor Reports
-                    </a>
-                </div>
-            </div>
+            <a href="#" class="nav-link text-white-75 py-2 px-3 d-block rounded mx-2 transition-hover">
+                <i class="bi bi-file-earmark-text me-3"></i>System Reports
+            </a>
+            
+            <a href="#" class="nav-link text-white-75 py-2 px-3 d-block rounded mx-2 transition-hover">
+                <i class="bi bi-journal-text me-3"></i>Audit Logs
+            </a>
+            
+            <a href="#" class="nav-link text-white-75 py-2 px-3 d-block rounded mx-2 transition-hover">
+                <i class="bi bi-bell me-3"></i>Notifications
+            </a>
         </div>
         
         <!-- System Administration -->
-        {% if user.is_superuser %}
-        <div class="nav-section mb-3">
-            <h6 class="nav-header text-white-50 px-3 mb-2 small fw-semibold text-uppercase">System Admin</h6>
+        {% if user.is_staff or user.is_superuser %}
+        <div class="nav-section mb-4">
+            <h6 class="nav-header text-white-50 px-3 mb-2 small fw-semibold text-uppercase">Administration</h6>
             
-            <a href="/admin/" class="nav-link text-white-75 py-2 px-3 d-block rounded mx-2 transition-hover" target="_blank">
-                <i class="bi bi-gear-fill me-3"></i>Django Admin
-            </a>
-            
-            <a href="/admin/sites/site/" class="nav-link text-white-75 py-2 px-3 d-block rounded mx-2 transition-hover" target="_blank">
-                <i class="bi bi-sliders me-3"></i>System Settings
+            <a href="#" class="nav-link text-white-75 py-2 px-3 d-block rounded mx-2 transition-hover">
+                <i class="bi bi-gear me-3"></i>System Settings
             </a>
             
             <a href="{% url 'devices:export_excel' %}" class="nav-link text-white-75 py-2 px-3 d-block rounded mx-2 transition-hover">
@@ -289,16 +246,19 @@
     </div>
 </nav>
 
+<!-- Mobile Sidebar Overlay (Bootstrap breakpoint compatibility) -->
+<div class="sidebar-overlay d-lg-none" id="sidebarOverlay"></div>
+
 <!-- Custom Sidebar Styles -->
 <style>
-/* Sidebar Base Styles - Following Glass-morphism Design Patterns */
+/* Sidebar Base Styles - PIMS Design Rules: Flat design with high contrast, teal color scheme */
 .sidebar {
     position: fixed;
     top: 56px;
     left: 0;
     height: calc(100vh - 56px);
     width: 280px;
-    background: linear-gradient(135deg, var(--parliament-primary) 0%, #1e40af 50%, #1d4ed8 100%);
+    background: linear-gradient(2deg, rgb(25, 27, 28) 0%, rgb(57, 61, 59) 50%, rgb(35, 37, 39) 100%);
     z-index: 1020;
     overflow-y: auto;
     overflow-x: hidden;
@@ -307,24 +267,36 @@
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.1);
 }
 
-/* Sidebar Header */
+/* Mobile responsive sidebar */
+@media (max-width: 1023.98px) {
+    .sidebar {
+        transform: translateX(-100%);
+        display: block !important;
+    }
+    
+    .sidebar.show {
+        transform: translateX(0);
+    }
+}
+
+/* Sidebar Header - High contrast design */
 .sidebar-header {
-    background: rgba(0, 0, 0, 0.1);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.15);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .sidebar-header h5 {
     font-size: 1.1rem;
     margin-bottom: 0.25rem;
+    font-weight: 700;
 }
 
 .sidebar-header small {
     font-size: 0.75rem;
-    opacity: 0.8;
+    opacity: 0.9;
 }
 
-/* Sidebar Menu Scrollbar */
+/* Scrollbar styling for better UX */
 .sidebar::-webkit-scrollbar {
     width: 6px;
 }
@@ -347,16 +319,17 @@
     position: relative;
 }
 
-/* Section Headers */
+/* Section Headers - Flat design with clear typography */
 .nav-header {
     font-size: 0.75rem;
     letter-spacing: 0.5px;
     margin-bottom: 0.5rem;
     text-transform: uppercase;
     font-weight: 600;
+    color: rgba(255, 255, 255, 0.7) !important;
 }
 
-/* Navigation Links */
+/* Navigation Links - High contrast, readable design */
 .sidebar .nav-link {
     color: rgba(255, 255, 255, 0.85) !important;
     transition: all 0.25s ease;
@@ -365,6 +338,7 @@
     font-weight: 500;
     font-size: 0.9rem;
     border: 1px solid transparent;
+    position: relative;
 }
 
 .sidebar .nav-link:hover {
@@ -376,34 +350,26 @@
 }
 
 .sidebar .nav-link.active {
-    background-color: rgba(255, 255, 255, 0.25);
+    background-color: rgba(255, 255, 255, 0.2);
     color: white !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    font-weight: 600;
     border-color: rgba(255, 255, 255, 0.3);
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Main navigation icons */
-.sidebar .nav-link > i:first-child {
-    width: 20px;
-    text-align: center;
-    font-size: 1rem;
-}
-
-/* Submenu Styling */
+/* Submenu Styles - Flat design with clear hierarchy */
 .submenu {
     display: none;
-    padding-left: 0.5rem;
-    margin-top: 0.25rem;
-    margin-bottom: 0.5rem;
-    border-left: 2px solid rgba(255, 255, 255, 0.15);
-    margin-left: 1rem;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    margin: 0.5rem 0;
+    padding: 0.25rem 0;
+    border-left: 2px solid rgba(255, 255, 255, 0.2);
 }
 
-.nav-item:hover .submenu,
-.nav-item.active .submenu {
+.submenu.show {
     display: block;
-    animation: slideDown 0.3s ease;
+    animation: slideDown 0.2s ease-out;
 }
 
 @keyframes slideDown {
@@ -418,89 +384,199 @@
 }
 
 .submenu .nav-link {
-    font-size: 0.85rem;
-    padding: 0.4rem 0.75rem;
+    font-size: 0.8rem;
+    padding: 0.4rem 1rem !important;
     color: rgba(255, 255, 255, 0.7) !important;
-    font-weight: 400;
     margin: 1px 0;
 }
 
 .submenu .nav-link:hover {
-    color: rgba(255, 255, 255, 0.95) !important;
-    background-color: rgba(255, 255, 255, 0.12);
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.9) !important;
     transform: translateX(2px);
 }
 
 .submenu .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.15);
     color: white !important;
-    background-color: rgba(255, 255, 255, 0.2);
-    font-weight: 500;
+    font-weight: 600;
 }
 
-/* Submenu icons */
-.submenu .nav-link i {
-    width: 16px;
-    text-align: center;
-    font-size: 0.8rem;
-}
-
-/* Chevron icons for expandable items */
-.bi-chevron-down {
-    transition: transform 0.3s ease;
-    opacity: 0.6;
-}
-
-.nav-item:hover .bi-chevron-down {
+/* Chevron rotation for expanded items */
+.nav-link[aria-expanded="true"] .bi-chevron-down {
     transform: rotate(180deg);
-    opacity: 1;
 }
 
-/* Text utilities */
-.text-white-75 {
-    color: rgba(255, 255, 255, 0.75) !important;
-}
-
-.text-white-50 {
-    color: rgba(255, 255, 255, 0.5) !important;
-}
-
-/* Transition hover utility */
+/* Transition effects for better UX */
 .transition-hover {
-    transition: all 0.25s ease;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Mobile responsiveness */
-@media (max-width: 991.98px) {
+/* Mobile sidebar overlay */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1019;
+    display: none;
+}
+
+.sidebar.show ~ .sidebar-overlay {
+    display: block;
+}
+
+/* Icons spacing and alignment */
+.sidebar .nav-link i {
+    width: 1.2rem;
+    text-align: center;
+    font-size: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 575.98px) {
     .sidebar {
-        transform: translateX(-100%);
-    }
-    
-    .sidebar.show {
-        transform: translateX(0);
-    }
-    
-    .sidebar-header h5 {
-        font-size: 1rem;
-    }
-    
-    .sidebar-header small {
-        font-size: 0.7rem;
+        width: 100%;
     }
 }
 
-/* Enhanced focus states for accessibility */
+/* Badge styles for notifications */
+.nav-badge {
+    background: #f97316;
+    color: white;
+    font-size: 0.6rem;
+    padding: 0.2rem 0.4rem;
+    border-radius: 10px;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+}
+
+/* High contrast focus states for accessibility */
 .sidebar .nav-link:focus {
-    outline: 2px solid rgba(255, 255, 255, 0.5);
+    outline: 2px solid rgba(255, 255, 255, 0.8);
     outline-offset: 2px;
 }
 
-/* Special styling for admin links */
-.nav-section:last-child .nav-link {
-    border-left: 3px solid rgba(220, 38, 38, 0.5);
-}
-
-.nav-section:last-child .nav-link:hover {
-    border-left-color: rgba(220, 38, 38, 0.8);
+/* Bangladesh location context - Dhaka Parliament theme */
+.sidebar-header::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #006a4e 0%, #f42a41 50%, #006a4e 100%);
 }
 </style>
+
+<!-- Sidebar JavaScript Functionality -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize sidebar functionality
+    const sidebar = document.getElementById('sidebar');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    const sidebarOverlay = document.getElementById('sidebarOverlay');
+    
+    // Toggle sidebar on mobile
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', function(e) {
+            e.preventDefault();
+            sidebar.classList.toggle('show');
+            
+            if (sidebarOverlay) {
+                sidebarOverlay.style.display = sidebar.classList.contains('show') ? 'block' : 'none';
+            }
+        });
+    }
+    
+    // Close sidebar when clicking overlay
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener('click', function() {
+            sidebar.classList.remove('show');
+            this.style.display = 'none';
+        });
+    }
+    
+    // Submenu toggle functionality
+    const menuItems = document.querySelectorAll('.sidebar .nav-item > .nav-link');
+    
+    menuItems.forEach(function(link) {
+        const parentItem = link.closest('.nav-item');
+        const submenu = parentItem.querySelector('.submenu');
+        
+        if (submenu) {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Toggle current submenu
+                const isOpen = submenu.classList.contains('show');
+                
+                if (isOpen) {
+                    submenu.classList.remove('show');
+                    link.setAttribute('aria-expanded', 'false');
+                } else {
+                    // Close other submenus (accordion behavior)
+                    document.querySelectorAll('.submenu.show').forEach(function(openSubmenu) {
+                        if (openSubmenu !== submenu) {
+                            openSubmenu.classList.remove('show');
+                            const openLink = openSubmenu.closest('.nav-item').querySelector('.nav-link');
+                            openLink.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                    
+                    // Open current submenu
+                    submenu.classList.add('show');
+                    link.setAttribute('aria-expanded', 'true');
+                }
+            });
+        }
+    });
+    
+    // Close sidebar on window resize if mobile
+    window.addEventListener('resize', function() {
+        if (window.innerWidth >= 1024) {
+            sidebar.classList.remove('show');
+            if (sidebarOverlay) {
+                sidebarOverlay.style.display = 'none';
+            }
+        }
+    });
+    
+    // Keyboard navigation support
+    sidebar.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            sidebar.classList.remove('show');
+            if (sidebarOverlay) {
+                sidebarOverlay.style.display = 'none';
+            }
+            if (sidebarToggle) {
+                sidebarToggle.focus();
+            }
+        }
+    });
+    
+    // Set active states based on current URL
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('.sidebar .nav-link[href]');
+    
+    navLinks.forEach(function(link) {
+        const href = link.getAttribute('href');
+        if (href && currentPath.startsWith(href) && href !== '/') {
+            link.classList.add('active');
+            
+            // If it's a submenu item, also show the parent submenu
+            const parentSubmenu = link.closest('.submenu');
+            if (parentSubmenu) {
+                parentSubmenu.classList.add('show');
+                const parentLink = parentSubmenu.closest('.nav-item').querySelector('.nav-link');
+                parentLink.setAttribute('aria-expanded', 'true');
+            }
+        }
+    });
+});
+</script>
+
 {% endif %}
