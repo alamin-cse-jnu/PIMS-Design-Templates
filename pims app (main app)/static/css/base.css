@@ -1,0 +1,725 @@
+/* pims/static/css/base.css - Core CSS for PIMS (Parliament IT Inventory Management System) */
+
+/* ===== CSS CUSTOM PROPERTIES ===== */
+:root {
+    /* Colors - Parliament Design System */
+    --primary-teal: #14b8a6;
+    --primary-teal-hover: #0d9488;
+    --primary-teal-lighter: rgba(20, 184, 166, 0.1);
+    --parliament-primary: #1e40af;
+    --parliament-secondary: #6366f1;
+    
+    /* Accent Colors */
+    --accent-orange: #f97316;
+    --accent-orange-hover: #ea580c;
+    --accent-red: #ef4444;
+    --accent-red-hover: #dc2626;
+    --accent-yellow: #eab308;
+    --accent-green: #22c55e;
+    
+    /* Neutral Colors */
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-400: #94a3b8;
+    --gray-500: #64748b;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --gray-900: #0f172a;
+    
+    /* Semantic Colors */
+    --success: var(--accent-green);
+    --warning: var(--accent-yellow);
+    --danger: var(--accent-red);
+    --info: var(--primary-teal);
+    
+    /* Background Colors */
+    --bg-primary: #ffffff;
+    --bg-secondary: var(--gray-50);
+    --bg-tertiary: var(--gray-100);
+    --bg-navbar: var(--bg-primary);
+    --bg-sidebar: var(--gray-800);
+    --bg-footer: var(--gray-900);
+    
+    /* Text Colors */
+    --text-primary: var(--gray-900);
+    --text-secondary: var(--gray-600);
+    --text-muted: var(--gray-500);
+    --text-white: #ffffff;
+    
+    /* Border Colors */
+    --border-light: var(--gray-200);
+    --border-medium: var(--gray-300);
+    --border-dark: var(--gray-400);
+    
+    /* Spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+    
+    /* Border Radius */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    --shadow-card: var(--shadow-sm);
+    
+    /* Typography */
+    --font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+    
+    /* Z-index Scale */
+    --z-sticky: 1020;
+    --z-fixed: 1030;
+    --z-modal: 1040;
+    --z-popover: 1050;
+    --z-tooltip: 1060;
+    
+    /* Transitions */
+    --transition: all 0.2s ease-in-out;
+    --transition-fast: all 0.15s ease-in-out;
+    --transition-slow: all 0.3s ease-in-out;
+}
+
+/* ===== BASE STYLES ===== */
+* {
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+body {
+    font-family: var(--font-family-base);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-normal);
+    line-height: 1.5;
+    color: var(--text-primary);
+    background-color: var(--bg-secondary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== LAYOUT COMPONENTS ===== */
+
+/* Navbar Styles */
+.navbar {
+    background-color: var(--bg-navbar) !important;
+    border-bottom: 1px solid var(--border-light);
+    box-shadow: var(--shadow-sm);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: var(--z-fixed);
+    height: 64px;
+}
+
+.navbar-brand {
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary) !important;
+    font-size: 1.25rem;
+}
+
+.navbar-nav .nav-link {
+    color: var(--text-secondary) !important;
+    font-weight: var(--font-weight-medium);
+    padding: 0.5rem 1rem !important;
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link:focus {
+    color: var(--primary-teal) !important;
+    background-color: var(--primary-teal-lighter);
+}
+
+/* Sidebar Styles - Flat Design with Click-based Persistent Submenus */
+.sidebar {
+    position: fixed;
+    top: 64px;
+    left: 0;
+    bottom: 0;
+    width: 260px;
+    background-color: var(--bg-sidebar);
+    border-right: 1px solid var(--border-medium);
+    overflow-y: auto;
+    z-index: var(--z-sticky);
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* Sidebar Menu Container */
+.sidebar-menu {
+    flex: 1;
+    padding: 1rem 0;
+    overflow-y: auto;
+}
+
+/* Sidebar Navigation Links */
+.sidebar .nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    padding: 0.75rem 1rem;
+    margin: 0.125rem 0.75rem;
+    border-radius: var(--radius-md);
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    font-weight: var(--font-weight-medium);
+    text-decoration: none;
+}
+
+.sidebar .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.15);
+    color: var(--text-white) !important;
+    transform: translateX(3px);
+}
+
+.sidebar .nav-link.active {
+    background-color: var(--primary-teal);
+    color: var(--text-white) !important;
+    font-weight: var(--font-weight-semibold);
+    box-shadow: var(--shadow-md);
+}
+
+.sidebar .nav-link i {
+    width: 20px;
+    margin-right: 0.75rem;
+    text-align: center;
+    font-size: 1rem;
+}
+
+/* Sidebar Section Headers */
+.nav-header {
+    font-size: 0.75rem;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.5) !important;
+    padding: 0 1rem;
+    text-transform: uppercase;
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Click-based Persistent Submenu Styling */
+.nav-item {
+    position: relative;
+}
+
+.nav-link-toggle {
+    position: relative;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.toggle-icon {
+    transition: transform 0.3s ease;
+    font-size: 0.8rem;
+    margin-left: auto;
+}
+
+.nav-link-toggle.expanded .toggle-icon {
+    transform: rotate(180deg);
+}
+
+.submenu {
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+    max-height: 0;
+    opacity: 0;
+    padding-left: 1rem;
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.submenu.show {
+    max-height: 500px;
+    opacity: 1;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.submenu .nav-link {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+    color: rgba(255, 255, 255, 0.7) !important;
+    margin: 0.125rem 0;
+    margin-left: 1rem;
+    border-radius: 6px;
+}
+
+.submenu .nav-link:hover {
+    color: rgba(255, 255, 255, 0.9) !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateX(2px);
+}
+
+.submenu .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white !important;
+}
+
+/* Sidebar Footer - Fixed at bottom */
+.sidebar-footer {
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 1rem;
+    margin-top: auto;
+    flex-shrink: 0;
+}
+
+.sidebar-footer .nav-link {
+    color: rgba(255, 255, 255, 0.8) !important;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    margin: 0;
+}
+
+.sidebar-footer .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white !important;
+}
+
+.sidebar-footer .dropdown-toggle::after {
+    margin-left: auto;
+}
+
+/* Text utilities for sidebar */
+.text-white-75 {
+    color: rgba(255, 255, 255, 0.75) !important;
+}
+
+.text-white-50 {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Transition hover class */
+.transition-hover {
+    transition: all 0.2s ease;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 1024px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    
+    .sidebar.show {
+        transform: translateX(0);
+        z-index: var(--z-modal);
+    }
+}
+
+/* Ensure consistent spacing */
+.nav-section {
+    margin-bottom: 1.5rem;
+}
+
+.nav-section:last-child {
+    margin-bottom: 0;
+}
+
+/* Main Content Area */
+.main-content {
+    margin-left: 260px;
+    margin-top: 64px;
+    min-height: calc(100vh - 64px);
+    background-color: var(--bg-secondary);
+    transition: var(--transition);
+}
+
+.content-wrapper {
+    padding: var(--spacing-xl);
+    min-height: calc(100vh - 120px);
+}
+
+/* ===== CARD COMPONENTS - FLAT DESIGN ===== */
+.card {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background-color: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-light);
+    padding: 1rem 1.25rem;
+    font-weight: var(--font-weight-semibold);
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+.card-footer {
+    background-color: var(--bg-tertiary);
+    border-top: 1px solid var(--border-light);
+    padding: 0.75rem 1.25rem;
+}
+
+/* ===== BUTTON COMPONENTS ===== */
+.btn {
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-md);
+    transition: var(--transition);
+    border: 1px solid transparent;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+.btn-primary {
+    background-color: var(--primary-teal);
+    border-color: var(--primary-teal);
+    color: var(--text-white);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: var(--primary-teal-hover);
+    border-color: var(--primary-teal-hover);
+    color: var(--text-white);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background-color: var(--gray-600);
+    border-color: var(--gray-600);
+    color: var(--text-white);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+    background-color: var(--gray-700);
+    border-color: var(--gray-700);
+    color: var(--text-white);
+}
+
+.btn-success {
+    background-color: var(--success);
+    border-color: var(--success);
+    color: var(--text-white);
+}
+
+.btn-warning {
+    background-color: var(--warning);
+    border-color: var(--warning);
+    color: var(--text-white);
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    border-color: var(--danger);
+    color: var(--text-white);
+}
+
+.btn-outline-primary {
+    color: var(--primary-teal);
+    border-color: var(--primary-teal);
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+    background-color: var(--primary-teal);
+    border-color: var(--primary-teal);
+    color: var(--text-white);
+}
+
+/* ===== FORM COMPONENTS ===== */
+.form-control {
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    transition: var(--transition);
+}
+
+.form-control:focus {
+    border-color: var(--primary-teal);
+    box-shadow: 0 0 0 0.2rem var(--primary-teal-lighter);
+}
+
+.form-label {
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.form-select {
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-md);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    transition: var(--transition);
+}
+
+.form-select:focus {
+    border-color: var(--primary-teal);
+    box-shadow: 0 0 0 0.2rem var(--primary-teal-lighter);
+}
+
+/* ===== TABLE COMPONENTS ===== */
+.table {
+    color: var(--text-primary);
+    border-color: var(--border-light);
+}
+
+.table thead th {
+    background-color: var(--bg-tertiary);
+    border-bottom: 1px solid var(--border-medium);
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    padding: 0.75rem;
+}
+
+.table tbody td {
+    padding: 0.75rem;
+    border-top: 1px solid var(--border-light);
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--bg-tertiary);
+}
+
+/* ===== ALERT COMPONENTS ===== */
+.alert {
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    padding: 0.75rem 1rem;
+}
+
+.alert-primary {
+    background-color: var(--primary-teal-lighter);
+    border-color: rgba(20, 184, 166, 0.2);
+    color: var(--primary-teal-hover);
+}
+
+.alert-success {
+    background-color: rgba(34, 197, 94, 0.1);
+    border-color: rgba(34, 197, 94, 0.2);
+    color: #15803d;
+}
+
+.alert-warning {
+    background-color: rgba(234, 179, 8, 0.1);
+    border-color: rgba(234, 179, 8, 0.2);
+    color: #a16207;
+}
+
+.alert-danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: #dc2626;
+}
+
+/* ===== BADGE COMPONENTS ===== */
+.badge {
+    font-weight: var(--font-weight-medium);
+    border-radius: var(--radius-md);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+}
+
+.badge.bg-primary {
+    background-color: var(--primary-teal) !important;
+}
+
+.badge.bg-success {
+    background-color: var(--success) !important;
+}
+
+.badge.bg-warning {
+    background-color: var(--warning) !important;
+}
+
+.badge.bg-danger {
+    background-color: var(--danger) !important;
+}
+
+/* ===== DROPDOWN IMPROVEMENTS ===== */
+.dropdown-menu {
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    padding: 0.5rem;
+}
+
+.dropdown-item {
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    transition: var(--transition);
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background-color: var(--primary-teal-lighter);
+    color: var(--primary-teal-hover);
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 1024px) {
+    .main-content {
+        margin-left: 0;
+    }
+    
+    .content-wrapper {
+        padding: var(--spacing-lg);
+    }
+}
+
+@media (max-width: 768px) {
+    .content-wrapper {
+        padding: var(--spacing-md);
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .btn {
+        padding: 0.75rem 1rem;
+        font-size: 0.875rem;
+    }
+}
+
+/* Small Mobile Styles */
+@media (max-width: 480px) {
+    :root {
+        --spacing-md: 0.75rem;
+        --spacing-lg: 1rem;
+        --spacing-xl: 1.5rem;
+    }
+    
+    .content-wrapper {
+        padding: var(--spacing-sm);
+    }
+    
+    .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8125rem;
+    }
+}
+
+/* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Focus Styles for Keyboard Navigation */
+.btn:focus-visible,
+.form-control:focus-visible,
+.form-select:focus-visible {
+    outline: 2px solid var(--primary-teal);
+    outline-offset: 2px;
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    :root {
+        --border-light: var(--gray-400);
+        --border-medium: var(--gray-600);
+        --text-muted: var(--gray-700);
+    }
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+    .sidebar,
+    .navbar,
+    .btn,
+    .alert {
+        display: none !important;
+    }
+    
+    .main-content {
+        margin-left: 0 !important;
+        margin-top: 0 !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid var(--gray-400) !important;
+    }
+}
+
+/* ===== PARLIAMENT SPECIFIC STYLES ===== */
+.parliament-header {
+    background: linear-gradient(135deg, var(--primary-teal) 0%, var(--parliament-primary) 100%);
+    color: var(--text-white);
+    padding: var(--spacing-xl);
+    border-radius: var(--radius-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.parliament-logo {
+    max-height: 60px;
+    margin-right: var(--spacing-md);
+}
+
+.location-badge {
+    background-color: var(--primary-teal-lighter);
+    color: var(--primary-teal-hover);
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-lg);
+    font-size: 0.8125rem;
+    font-weight: var(--font-weight-medium);
+}
+
+/* ===== END OF PIMS BASE CSS ===== */

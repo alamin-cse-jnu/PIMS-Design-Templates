@@ -1,0 +1,844 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - PIMS - Bangladesh Parliament Secretariat{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Dashboard Specific Styling - Flat Design */
+.dashboard-container {
+    background-color: var(--bg-secondary);
+    min-height: 100vh;
+    padding: 2rem 0;
+}
+
+.dashboard-header {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--shadow-card);
+}
+
+.dashboard-title {
+    color: var(--text-primary);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.dashboard-subtitle {
+    color: var(--text-secondary);
+    margin-bottom: 0;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+}
+
+.stat-card {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-xl);
+    box-shadow: var(--shadow-card);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: var(--stat-color, var(--primary-teal));
+}
+
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-card.users { --stat-color: var(--primary-teal); }
+.stat-card.devices { --stat-color: var(--success); }
+.stat-card.locations { --stat-color: var(--primary-orange); }
+.stat-card.assignments { --stat-color: var(--primary-red); }
+
+.stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--spacing-lg);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-xl);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--text-white);
+}
+
+.stat-icon.users { background-color: var(--primary-teal); }
+.stat-icon.devices { background-color: var(--success); }
+.stat-icon.locations { background-color: var(--primary-orange); }
+.stat-icon.assignments { background-color: var(--primary-red); }
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-number {
+    font-size: 2.5rem;
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+    line-height: 1;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: var(--font-weight-medium);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-change {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.75rem;
+    font-weight: var(--font-weight-medium);
+}
+
+.stat-change.positive {
+    color: var(--success);
+}
+
+.stat-change.negative {
+    color: var(--error);
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--spacing-xl);
+    margin-bottom: var(--spacing-xl);
+}
+
+.activity-section {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+}
+
+.section-header {
+    background: linear-gradient(135deg, var(--primary-teal), var(--primary-teal-hover));
+    color: var(--text-white);
+    padding: var(--spacing-lg);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.section-title {
+    font-size: 1.125rem;
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+}
+
+.section-actions {
+    display: flex;
+    gap: var(--spacing-xs);
+}
+
+.section-content {
+    padding: var(--spacing-lg);
+}
+
+.activity-item {
+    border-bottom: 1px solid var(--border-light);
+    padding: var(--spacing-md) 0;
+    transition: var(--transition);
+}
+
+.activity-item:hover {
+    background-color: var(--bg-secondary);
+    margin: 0 calc(var(--spacing-lg) * -1);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border-radius: var(--radius-md);
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: var(--spacing-md);
+    align-items: center;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: var(--text-white);
+}
+
+.activity-icon.device { background-color: var(--success); }
+.activity-icon.user { background-color: var(--primary-teal); }
+.activity-icon.assignment { background-color: var(--primary-orange); }
+.activity-icon.maintenance { background-color: var(--primary-red); }
+
+.activity-info {
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
+}
+
+.activity-meta {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.activity-time {
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.quick-actions {
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    box-shadow: var(--shadow-card);
+    margin-bottom: var(--spacing-lg);
+}
+
+.actions-grid {
+    display: grid;
+    gap: var(--spacing-sm);
+}
+
+.action-btn {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    text-decoration: none;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    transition: var(--transition);
+    font-weight: var(--font-weight-medium);
+}
+
+.action-btn:hover {
+    background-color: var(--primary-teal);
+    color: var(--text-white);
+    text-decoration: none;
+    transform: translateX(4px);
+}
+
+.chart-section {
+    grid-column: 1 / -1;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+}
+
+.chart-content {
+    padding: var(--spacing-lg);
+}
+
+.chart-container {
+    height: 400px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--radius-md);
+    border: 2px dashed var(--border-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chart-placeholder {
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.chart-placeholder i {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-md);
+    opacity: 0.5;
+}
+
+.alerts-section {
+    grid-column: 1 / -1;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+}
+
+.alerts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+    padding: var(--spacing-xl);
+}
+
+.alert-card {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-lg);
+    position: relative;
+    overflow: hidden;
+}
+
+.alert-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--alert-color, var(--primary-red));
+}
+
+.alert-card.warning { --alert-color: var(--primary-orange); }
+.alert-card.danger { --alert-color: var(--primary-red); }
+.alert-card.info { --alert-color: var(--primary-teal); }
+
+.alert-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.alert-icon {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: var(--text-white);
+    background: var(--alert-color, var(--primary-red));
+}
+
+.alert-title {
+    font-weight: var(--font-weight-semibold);
+    color: var(--text-primary);
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+.alert-content {
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem 0;
+    }
+    
+    .dashboard-header,
+    .activity-section,
+    .quick-actions,
+    .chart-section,
+    .alerts-section {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-md);
+    }
+    
+    .stat-card {
+        padding: var(--spacing-lg);
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+    }
+    
+    .alerts-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="dashboard-title">
+                    <i class="bi bi-speedometer2"></i>
+                    System Dashboard
+                </h1>
+                <p class="dashboard-subtitle">
+                    Real-time overview of PIMS operations at Bangladesh Parliament Secretariat
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <div class="text-muted">
+                    <i class="bi bi-clock me-1"></i>
+                    Last updated: <span id="last-updated">Just now</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="stats-grid">
+        <div class="stat-card users">
+            <div class="stat-header">
+                <div class="stat-content">
+                    <div class="stat-number" id="users-count">{{ stats.total_users|default:247 }}</div>
+                    <div class="stat-label">Active Users</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-arrow-up"></i>
+                        <span>+12 this month</span>
+                    </div>
+                </div>
+                <div class="stat-icon users">
+                    <i class="bi bi-people"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card devices">
+            <div class="stat-header">
+                <div class="stat-content">
+                    <div class="stat-number" id="devices-count">{{ stats.total_devices|default:1856 }}</div>
+                    <div class="stat-label">IT Devices</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-arrow-up"></i>
+                        <span>+45 this month</span>
+                    </div>
+                </div>
+                <div class="stat-icon devices">
+                    <i class="bi bi-laptop"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card locations">
+            <div class="stat-header">
+                <div class="stat-content">
+                    <div class="stat-number" id="locations-count">{{ stats.total_locations|default:156 }}</div>
+                    <div class="stat-label">Locations</div>
+                    <div class="stat-change positive">
+                        <i class="bi bi-arrow-up"></i>
+                        <span>+8 this month</span>
+                    </div>
+                </div>
+                <div class="stat-icon locations">
+                    <i class="bi bi-geo-alt"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card assignments">
+            <div class="stat-header">
+                <div class="stat-content">
+                    <div class="stat-number" id="assignments-count">{{ stats.active_assignments|default:892 }}</div>
+                    <div class="stat-label">Active Assignments</div>
+                    <div class="stat-change negative">
+                        <i class="bi bi-arrow-down"></i>
+                        <span>-23 this week</span>
+                    </div>
+                </div>
+                <div class="stat-icon assignments">
+                    <i class="bi bi-arrow-left-right"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Content Grid -->
+    <div class="dashboard-grid">
+        <!-- Recent Activity -->
+        <div class="activity-section">
+            <div class="section-header">
+                <h5 class="section-title">
+                    <i class="bi bi-clock-history"></i>
+                    Recent Activity
+                </h5>
+                <div class="section-actions">
+                    <a href="#" class="btn btn-sm btn-light">
+                        <i class="bi bi-eye"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="section-content">
+                {% for activity in recent_activities|slice:":10" %}
+                <div class="activity-item">
+                    <div class="activity-row">
+                        <div class="activity-icon {{ activity.type }}">
+                            {% if activity.type == 'device' %}
+                                <i class="bi bi-laptop"></i>
+                            {% elif activity.type == 'user' %}
+                                <i class="bi bi-person"></i>
+                            {% elif activity.type == 'assignment' %}
+                                <i class="bi bi-arrow-left-right"></i>
+                            {% elif activity.type == 'maintenance' %}
+                                <i class="bi bi-tools"></i>
+                            {% else %}
+                                <i class="bi bi-circle"></i>
+                            {% endif %}
+                        </div>
+                        <div class="activity-info">
+                            <div class="activity-title">{{ activity.description }}</div>
+                            <div class="activity-meta">
+                                <span><i class="bi bi-person me-1"></i>{{ activity.user.get_full_name|default:activity.user.username }}</span>
+                                {% if activity.location %}
+                                    <span><i class="bi bi-geo-alt me-1"></i>{{ activity.location }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="activity-time">
+                            {{ activity.created_at|timesince }} ago
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-4">
+                    <i class="bi bi-clock-history fs-1 mb-2 d-block opacity-50"></i>
+                    <p>No recent activity</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="section-header bg-transparent text-dark p-0 mb-3">
+                <h5 class="section-title">
+                    <i class="bi bi-lightning-charge"></i>
+                    Quick Actions
+                </h5>
+            </div>
+            <div class="actions-grid">
+                <a href="{% url 'devices:create' %}" class="action-btn">
+                    <i class="bi bi-plus-circle"></i>
+                    Add New Device
+                </a>
+                <a href="{% url 'assignments:create' %}" class="action-btn">
+                    <i class="bi bi-arrow-left-right"></i>
+                    Create Assignment
+                </a>
+                <a href="{% url 'maintenance:create' %}" class="action-btn">
+                    <i class="bi bi-tools"></i>
+                    Schedule Maintenance
+                </a>
+                <a href="{% url 'users:create' %}" class="action-btn">
+                    <i class="bi bi-person-plus"></i>
+                    Add User
+                </a>
+                <a href="{% url 'locations:create' %}" class="action-btn">
+                    <i class="bi bi-geo-alt"></i>
+                    Add Location
+                </a>
+                <a href="{% url 'reports:dashboard' %}" class="action-btn">
+                    <i class="bi bi-bar-chart"></i>
+                    View Reports
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="chart-section">
+        <div class="section-header">
+            <h5 class="section-title">
+                <i class="bi bi-graph-up"></i>
+                System Analytics
+            </h5>
+            <div class="section-actions">
+                <button class="btn btn-sm btn-light" id="chartPeriod" data-bs-toggle="dropdown">
+                    Last 30 Days
+                    <i class="bi bi-chevron-down ms-1"></i>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" data-period="7">Last 7 Days</a></li>
+                    <li><a class="dropdown-item" href="#" data-period="30">Last 30 Days</a></li>
+                    <li><a class="dropdown-item" href="#" data-period="90">Last 90 Days</a></li>
+                    <li><a class="dropdown-item" href="#" data-period="365">Last Year</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="chart-content">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <canvas id="deviceStatusChart"></canvas>
+                    </div>
+                    <div class="text-center mt-2">
+                        <h6 class="mb-0">Device Status Distribution</h6>
+                        <small class="text-muted">Current status of all devices</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="chart-container">
+                        <canvas id="maintenanceChart"></canvas>
+                    </div>
+                    <div class="text-center mt-2">
+                        <h6 class="mb-0">Maintenance Timeline</h6>
+                        <small class="text-muted">Completed vs scheduled maintenance</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Alerts -->
+    <div class="alerts-section">
+        <div class="section-header">
+            <h5 class="section-title">
+                <i class="bi bi-exclamation-triangle"></i>
+                System Alerts
+            </h5>
+            <div class="section-actions">
+                <a href="{% url 'alerts:list' %}" class="btn btn-sm btn-light">
+                    View All
+                </a>
+            </div>
+        </div>
+        <div class="alerts-grid">
+            {% for alert in system_alerts|slice:":6" %}
+            <div class="alert-card {{ alert.severity }}">
+                <div class="alert-header">
+                    <div class="alert-icon">
+                        {% if alert.severity == 'danger' %}
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                        {% elif alert.severity == 'warning' %}
+                            <i class="bi bi-exclamation-circle-fill"></i>
+                        {% else %}
+                            <i class="bi bi-info-circle-fill"></i>
+                        {% endif %}
+                    </div>
+                    <h6 class="alert-title">{{ alert.title }}</h6>
+                </div>
+                <div class="alert-content">
+                    {{ alert.message|truncatechars:100 }}
+                </div>
+            </div>
+            {% empty %}
+            <div class="alert-card info">
+                <div class="alert-header">
+                    <div class="alert-icon">
+                        <i class="bi bi-check-circle-fill"></i>
+                    </div>
+                    <h6 class="alert-title">System Healthy</h6>
+                </div>
+                <div class="alert-content">
+                    All systems are operating normally. No critical alerts at this time.
+                </div>
+            </div>
+            <div class="alert-card warning">
+                <div class="alert-header">
+                    <div class="alert-icon">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                    </div>
+                    <h6 class="alert-title">Maintenance Due</h6>
+                </div>
+                <div class="alert-content">
+                    5 devices are scheduled for maintenance in the next 7 days.
+                </div>
+            </div>
+            <div class="alert-card info">
+                <div class="alert-header">
+                    <div class="alert-icon">
+                        <i class="bi bi-info-circle-fill"></i>
+                    </div>
+                    <h6 class="alert-title">Software Updates</h6>
+                </div>
+                <div class="alert-content">
+                    System updates are available for deployment during the next maintenance window.
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update last updated time
+    function updateLastUpdated() {
+        document.getElementById('last-updated').textContent = 'Just now';
+    }
+    
+    // Update every 30 seconds
+    setInterval(updateLastUpdated, 30000);
+    
+    // Chart period selector
+    document.querySelectorAll('[data-period]').forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const period = this.getAttribute('data-period');
+            const periodText = this.textContent;
+            
+            document.getElementById('chartPeriod').innerHTML = 
+                periodText + ' <i class="bi bi-chevron-down ms-1"></i>';
+            
+            // Update charts based on period
+            console.log('Updating charts for period:', period);
+        });
+    });
+    
+    // Initialize charts if Chart.js is available
+    if (typeof Chart !== 'undefined') {
+        initDashboardCharts();
+    }
+});
+
+function initDashboardCharts() {
+    // Device Status Chart
+    const deviceCtx = document.getElementById('deviceStatusChart');
+    if (deviceCtx) {
+        new Chart(deviceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Available', 'Assigned', 'Maintenance', 'Retired'],
+                datasets: [{
+                    data: [{{ stats.devices_available|default:645 }}, {{ stats.devices_assigned|default:892 }}, {{ stats.devices_maintenance|default:156 }}, {{ stats.devices_retired|default:163 }}],
+                    backgroundColor: [
+                        '#14b8a6', // teal
+                        '#22c55e', // green
+                        '#f97316', // orange
+                        '#ef4444'  // red
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Maintenance Timeline Chart
+    const maintenanceCtx = document.getElementById('maintenanceChart');
+    if (maintenanceCtx) {
+        new Chart(maintenanceCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Completed',
+                    data: [12, 19, 15, 25, 22, 30],
+                    borderColor: '#14b8a6',
+                    backgroundColor: 'rgba(20, 184, 166, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Scheduled',
+                    data: [8, 15, 12, 18, 16, 24],
+                    borderColor: '#f97316',
+                    backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)'
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true
+                        }
+                    }
+                }
+            }
+        });
+    }
+}
+</script>
+{% endblock %}
